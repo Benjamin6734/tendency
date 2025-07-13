@@ -2,12 +2,13 @@
 const CACHE_NAME = 'mahudhurio-cache-v2'; // Imebadilishwa kutoka 'tendency-cache-v2' kwa uwazi zaidi
 
 // Orodha kamili ya faili za kukache, ikijumuisha Firebase CDN na ikoni moja tu.
+// MUHIMU: Hakikisha njia zote za faili hizi ni sahihi na faili zenyewe zinapatikana.
 const urlsToCache = [
   '/', // Kache ukurasa wa nyumbani
   '/index.html', // Kache faili kuu ya HTML
   '/manifest.json', // Kache faili ya manifest
   // Njia ya ikoni moja tu kama ilivyofafanuliwa kwenye manifest.json
-  '/rsz_capture.png',
+  '/icons/icon-192x192.png',
   // Maktaba za JavaScript kutoka CDN zinazotumiwa na programu
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
