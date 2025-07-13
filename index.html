@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahudhurio ya Wanafunzi - Shule ya Msingi Mabatini</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+    /* Global Styles */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        margin: 0; /* Remove default body margin */
+        padding: 15px; /* Add some padding around the content for mobile */
+        background-color: #f4f4f9;
+        color: #333;
+        box-sizing: border-box; /* Ensure padding is included in element's total width/height */
+        display: flex; /* Flexbox for full page layout */
+        flex-direction: column;
+        min-height: 100vh; /* Ensure body takes full viewport height */
+    }
+    .container {
+        background-color: #fff;
+        padding: 20px; /* Slightly reduced padding for mobile */
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin: 0 auto; /* Center container */
+        max-width: 800px; /* Max width for larger screens */
+        flex-grow: 1; /* Allow container to grow and fill space */
+        position: relative; /* Needed for logout button positioning */
+    }
+    h2 {
+        text-align: center;
+        color: #0056b3;
+        margin-bottom: 20px; /* Reduced margin */
+        font-size: 1.8em; /* Slightly smaller for mobile */
+    }
+    .school-name {
+        text-align: center;
+        color: #0056b3;
+        margin-bottom: 10px;
+        font-size: 1.1em; /* Slightly smaller */
+        font-weight: bold;
+    }
+
+    /* Control Panel Styles */
+    .controls {
+        display: flex;
+        flex-wrap: wrap; /* Allow items to wrap to next line */
+        gap: 10px; /* Reduced gap */
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #eef4ff;
+        border-radius: 8px;
+        justify-content: center; /* Center items for better mobile layout */
+    }
+    .controls label {
+        font-size: 0.9em; /* Smaller label font */
+        margin-bottom: 5px; /* Add space below label */
+        width: 100%; /* Make labels take full width above input */
+        text-align: left; /* Align labels left */
+        font-weight: 500;
+        color: #555;
+    }
+    .controls input[type="number"], 
+    .controls input[type="text"], 
+    .controls select {
+        padding: 10px 12px; /* Increased padding for easier tapping */
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em; /* Standard font size */
+        width: calc(100% - 24px); /* Full width minus padding */
+        box-sizing: border-box; /* Include padding in width calculation */
+    }
+    .controls input:focus, .controls select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+    .controls button {
+        border: none;
+        padding: 12px 18px; /* Larger buttons for mobile */
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 1em; /* Standard font size */
+        width: 100%; /* Full width for buttons on small screens */
+        box-sizing: border-box;
+    }
+    /* Specific control item styling for better wrapping */
+    .controls > div, .controls > label, .controls > input, .controls > select {
+        flex-basis: calc(50% - 10px); /* Two items per row, adjust gap */
+        max-width: calc(50% - 10px);
+    }
+    .controls button {
+        flex-basis: calc(50% - 10px);
+        max-width: calc(50% - 10px);
+    }
+    /* Override for search container to take full width when results are open */
+    .search-container {
+        position: relative;
+        flex-basis: 100%; /* Take full width */
+        max-width: 100%;
+        margin-top: 5px; /* Add some space */
+    }
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 0 0 6px 6px;
+        z-index: 1000;
+        max-height: 150px; /* Smaller max height for mobile */
+        overflow-y: auto;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .search-item {
+        padding: 10px 12px; /* Smaller padding for search results */
+        font-size: 0.95em;
+    }
+
+    /* Table Styles (for responsiveness) */
+    .modal-body {
+        overflow-x: auto; /* Allow horizontal scrolling for tables */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%; /* Ensure table takes full width of its container */
+        font-size: 0.8em; /* Smaller font size for table content */
+        min-width: 600px; /* Ensure table doesn't shrink too much, force scroll */
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 6px 3px; /* Reduced padding in table cells */
+        text-align: center;
+        white-space: nowrap; /* Prevent wrapping in cells, forces horizontal scroll */
+    }
+    th {
+        background: #e9ecef;
+        font-weight: 600;
+        color: #495057;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .summary-column {
+        background-color: #d1ecf1;
+        font-weight: bold;
+        color: #0c5460;
+    }
+    
+    /* --- Modal/Popup Styles --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7); /* Slightly darker overlay for mobile */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+        padding: 10px; /* Padding for modal content */
+        box-sizing: border-box;
+    }
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+        width: 100%; /* Make modal content take full width */
+        max-width: 450px; /* Limit max width for larger screens */
+        animation: fadeIn 0.3s ease-out;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        max-height: 95%; /* Prevent modal from overflowing screen height */
+        overflow-y: auto; /* Allow scrolling within modal if content is long */
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    /* Specific overrides for different modals */
+    #attendanceModal .modal-content, #callNamesModal .modal-content {
+        max-width: 350px; /* Slightly smaller max-width for these specific modals */
+        text-align: center;
+    }
+    #tableModal .modal-content {
+        max-width: 95%;
+        height: 90vh; /* Max height for table modal */
+        width: 95%; /* Take more width for table modal */
+    }
+    #registerModal .modal-content, #changePasswordModal .modal-content, #userProfileModal .modal-content {
+        max-width: 400px; /* Adjust for register/profile modal */
+    }
+    #addStudentModal .modal-content, #editStudentModal .modal-content, #deleteStudentModal .modal-content {
+        max-width: 400px;
+    }
+    #uploadStudentsJsonModal .modal-content {
+        max-width: 600px; /* Wider for JSON input */
+    }
+    .modal-header h3 { font-size: 1.5em; margin-bottom: 5px; } /* Smaller header font */
+    .modal-header p { font-size: 1em; } /* Smaller paragraph font */
+    .modal-buttons { 
+        display: flex; 
+        justify-content: center; 
+        gap: 10px; /* Reduced gap */
+        margin-bottom: 15px; 
+        flex-wrap: wrap; /* Allow buttons to wrap */
+    }
+    .modal-buttons button {
+        padding: 12px 0; /* Adjust padding */
+        width: 70px; height: 70px; /* Larger circular buttons */
+        font-size: 22px; /* Larger font for status */
+        flex-shrink: 0; /* Don't shrink buttons */
+    }
+    .modal-close { 
+        padding: 10px 15px; /* Adjust close button padding */
+        font-size: 1em;
+        width: auto; /* Allow close button to size naturally */
+    }
+    .modal-close-corner {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 30px;
+        cursor: pointer;
+        color: #888;
+    }
+    .modal-close-corner:hover {
+        color: #333;
+    }
+    
+    /* Form input styles within modals */
+    .modal-content input[type="text"], .modal-content select, .modal-content input[type="password"],
+    .modal-content textarea {
+        width: calc(100% - 20px); /* Full width minus padding */
+        padding: 10px;
+        margin-bottom: 15px; /* Slightly reduced margin */
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+    .modal-content textarea {
+        resize: vertical;
+        min-height: 150px; /* Adequate height for JSON input */
+        font-family: 'Consolas', 'Monaco', monospace; /* Monospaced font for JSON */
+    }
+    .modal-content label {
+        display: block;
+        text-align: left;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+        font-size: 0.9em;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .modal-footer button {
+        padding: 10px 15px; /* Smaller padding for footer buttons */
+        font-size: 1em;
+        /* margin: 0 5px; */ /* Removed to use gap */
+    }
+    /* Specific styling for user profile modal buttons */
+    #userProfileModal .modal-footer button {
+        width: 100%; /* Make buttons full width in profile modal */
+        max-width: 250px; /* Limit width */
+    }
+
+
+    /* Responsive adjustments for smaller screens (typically phones) */
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+        .container {
+            padding: 15px;
+        }
+        h2 {
+            font-size: 1.6em;
+        }
+        .school-name {
+            font-size: 1em;
+        }
+        .controls {
+            flex-direction: column; /* Stack controls vertically */
+            gap: 10px;
+            padding: 10px;
+        }
+        .controls label,
+        .controls input,
+        .controls select,
+        .controls button,
+        .controls > div { /* Target all control items */
+            flex-basis: 100%; /* Take full width */
+            max-width: 100%;
+        }
+        /* Specific override for search input to ensure it takes full width */
+        .controls #studentSearchContainer,
+        #editStudentModal .search-container,
+        #deleteStudentModal .search-container {
+            width: 100%;
+            max-width: 100%;
+            flex-basis: 100%;
+        }
+
+        .modal-content {
+            padding: 15px;
+        }
+        .modal-buttons button {
+            width: 60px; /* Slightly smaller buttons for tiny screens */
+            height: 60px;
+            font-size: 20px;
+        }
+        .modal-footer button {
+            margin: 0 3px;
+        }
+    }
+
+    /* General Button Styles (kept from previous version for consistency) */
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-warning { background-color: #ffc107; color: #333; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-info { background-color: #17a2b8; color: white; }
+    .btn-purple { background-color: #6f42c1; color: white; } /* New color for JSON upload */
+    .btn-present { background-color: #28a745; color: white; } /* Green for Present */
+    .btn-absent { background-color: #dc3545; color: white; } /* Red for Absent */
+    .btn-late { background-color: #ffc107; color: #333; } /* Amber for Late */
+
+    .btn-primary:hover, .btn-success:hover, .btn-danger:hover, .btn-warning:hover, .btn-secondary:hover, .btn-info:hover, .btn-purple:hover,
+    .btn-present:hover, .btn-absent:hover, .btn-late:hover { opacity: 0.9; }
+
+    /* Footer for "Powered by" text */
+    .footer-text {
+        text-align: center;
+        margin-top: 30px; /* Space above the text */
+        font-size: 0.85em; /* Smaller font size */
+        color: #777;
+        padding-bottom: 20px; /* Ensure some space at the very bottom */
+    }
+
+    /* Login Form Styles */
+    #loginContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh; /* Take full viewport height */
+        background-color: #f4f4f9;
+        position: fixed; /* Fixed to cover the whole screen */
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 2000; /* Above everything else */
+    }
+    #loginForm {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        width: 100%;
+        max-width: 400px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    #loginForm h2 {
+        margin-bottom: 30px;
+        color: #0056b3;
+    }
+    #loginForm label {
+        display: block;
+        text-align: left;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+    }
+    #loginForm input[type="text"],
+    #loginForm input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1.1em;
+        box-sizing: border-box;
+    }
+    #loginForm button {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1em;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-bottom: 10px; /* Space between buttons */
+    }
+    #loginForm button:hover {
+        background-color: #0056b3;
+    }
+    #loginMessage {
+        color: #dc3545;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    /* Hide main content until logged in */
+    #mainContent {
+        display: none; 
+        flex-direction: column; /* Ensure it behaves like container */
+        flex-grow: 1;
+    }
+
+    /* Profile Button in Main Content */
+    #profileBtn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 0.9em;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 1;
+    }
+    #profileBtn:hover {
+        background-color: #5a6268;
+    }
+    
+    .json-example {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 15px;
+        font-size: 0.85em;
+        color: #555;
+        overflow-x: auto;
+    }
+    .json-example pre {
+        margin: 0;
+        white-space: pre-wrap; /* Allows text to wrap */
+        word-break: break-all; /* Breaks long words */
+    }
+</style>
+</head>
+<body>
+
+<div id="loginContainer">
+    <div id="loginForm">
+        <div class="school-name">Shule ya Msingi Mabatini</div>
+        <h2>Ingia Kwenye Mfumo</h2>
+        <label for="username">Jina la Mtumiaji:</label>
+        <input type="text" id="username" placeholder="Weka jina la mtumiaji">
+        <label for="password">Nenosiri:</label>
+        <input type="password" id="password" placeholder="Weka nenosiri">
+        <button onclick="login()" class="btn-primary">Ingia</button>
+        <button class="btn-success" onclick="openRegisterModal()">Sajili Mtumiaji Mpya</button> 
+        <p id="loginMessage"></p>
+    </div>
+</div>
+
+<div id="mainContent" class="container">
+    <button id="profileBtn" class="btn-secondary">Profile ya Mtumiaji</button>
+    <div class="school-name">Shule ya Msingi Mabatini</div>
+    <h2>Mfumo wa Mahudhurio ya Wanafunzi</h2>
+    
+    <div class="controls">
+        <label for="yearSelector">Chagua Mwaka:</label>
+        <select id="yearSelector"></select>
+
+        <label for="monthSelector">Chagua Mwezi:</label>
+        <select id="monthSelector">
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2">Machi</option>
+            <option value="3">Aprili</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Julai</option>
+            <option value="7">Agosti</option>
+            <option value="8">Septemba</option>
+            <option value="9">Oktoba</option>
+            <option value="10">Novemba</option>
+            <option value="11">Desemba</option>
+        </select>
+
+        <label for="daySelector">Chagua Siku:</label>
+        <input type="number" id="daySelector" min="1" max="31" value="1">
+        
+        <label for="attendanceFilter">Onyesha Walio-:</label>
+        <select id="attendanceFilter">
+            <option value="all">Wote</option>
+            <option value="A">Waliokosa (A)</option>
+            <option value="L">Waliochelewa (L)</option>
+        </select>
+
+        <div id="studentSearchContainer" class="search-container">
+            <label for="studentSearch">Tafuta Mwanafunzi:</label>
+            <input type="text" id="studentSearch" placeholder="Andika jina ili kuweka mahudhurio..." oninput="searchStudent()">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        <button id="callNamesBtn" class="btn-primary">Ita Majina</button>
+        <button id="viewTableBtn" class="btn-primary">Ona Mahudhurio Yote</button>
+        <button id="addStudentBtn" class="btn-success">Ongeza Mwanafunzi</button>
+        <button id="uploadStudentsJsonBtn" class="btn-purple">Pakia Wanafunzi (JSON)</button>
+        <button id="editStudentBtn" class="btn-warning">Hariri Mwanafunzi</button>
+        <button id="deleteStudentBtn" class="btn-danger">Futa Mwanafunzi</button>
+    </div>
+</div>
+
+<div id="attendanceModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closePopup()">&times;</button>
+        <div class="modal-header">
+            <h3 id="modalStudentName"></h3>
+            <p id="modalDate"></p>
+        </div>
+        <div class="modal-buttons">
+            <button id="btn-present" class="btn-present" onclick="markAndClose('P')">P</button>
+            <button id="btn-absent" class="btn-absent" onclick="markAndClose('A')">A</button>
+            <button id="btn-late" class="btn-late" onclick="markAndClose('L')">L</button>
+        </div>
+    </div>
+</div>
+
+<div id="callNamesModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeCallNamesModal()">&times;</button>
+        <div class="modal-header">
+            <h3 id="callNameModalStudentName"></h3>
+            <p id="callNameModalDate"></p>
+        </div>
+        <div class="modal-buttons">
+            <button id="callNamesBtn-present" class="btn-present" onclick="markAndAdvance('P')">P</button>
+            <button id="callNamesBtn-absent" class="btn-absent" onclick="markAndAdvance('A')">A</button>
+            <button id="callNamesBtn-late" class="btn-late" onclick="markAndAdvance('L')">L</button>
+        </div>
+    </div>
+</div>
+
+<div id="tableModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="hideTableModal()">&times;</button>
+        <div class="modal-header" id="tableModalHeader">
+            <h3 id="attendanceTableTitle"></h3>
+            <input type="text" id="tableSearchInput" placeholder="Tafuta Mwanafunzi Kwenye Jedwali..." oninput="filterTable()">
+        </div>
+        <div class="modal-body">
+            <table id="attendanceTable"></table>
+        </div>
+        <div class="modal-footer">
+            <button id="downloadPdfBtn" class="btn-success">Pakua Kama PDF</button>
+            <button class="modal-close btn-secondary" onclick="hideTableModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="addStudentModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeAddStudentModal()">&times;</button>
+        <h3>Ongeza Mwanafunzi Mpya</h3>
+        <label for="newStudentNameInput">Jina Kamili:</label>
+        <input type="text" id="newStudentNameInput" placeholder="Andika jina kamili la mwanafunzi">
+        <label for="newStudentGenderSelect">Jinsia:</label>
+        <select id="newStudentGenderSelect">
+            <option value="ME">Kiume (ME)</option>
+            <option value="KE">Kike (KE)</option>
+        </select>
+        <div class="modal-footer">
+            <button id="addStudentConfirmBtn" class="btn-primary" onclick="confirmAddStudent()">Ongeza</button>
+            <button class="modal-close btn-secondary" onclick="closeAddStudentModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="editStudentModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeEditStudentModal()">&times;</button>
+        <h3>Hariri Mwanafunzi</h3>
+        <label for="editStudentSearch">Tafuta Mwanafunzi (Hariri):</label>
+        <div class="search-container">
+            <input type="text" id="editStudentSearch" placeholder="Andika jina..." oninput="searchEditStudent()">
+            <div id="editSearchResults" class="search-results"></div>
+        </div>
+        <label for="editedStudentNameInput">Jina Jipya:</label>
+        <input type="text" id="editedStudentNameInput" placeholder="Jina jipya">
+        <label for="editedStudentGenderSelect">Jinsia Mpya:</label>
+        <select id="editedStudentGenderSelect">
+            <option value="ME">Kiume (ME)</option>
+            <option value="KE">Kike (KE)</option>
+        </select>
+        <div class="modal-footer">
+            <button id="editStudentConfirmBtn" class="btn-primary" onclick="confirmEditStudent()" disabled>Hariri</button>
+            <button class="modal-close btn-secondary" onclick="closeEditStudentModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteStudentModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeDeleteStudentModal()">&times;</button>
+        <h3>Futa Mwanafunzi</h3>
+        <label for="deleteStudentSearch">Tafuta Mwanafunzi (Futa):</label>
+        <div class="search-container">
+            <input type="text" id="deleteStudentSearch" placeholder="Andika jina..." oninput="searchDeleteStudent()">
+            <div id="deleteSearchResults" class="search-results"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="deleteStudentConfirmBtn" class="btn-danger" onclick="confirmDeleteStudent()" disabled>Futa</button>
+            <button class="modal-close btn-secondary" onclick="closeDeleteStudentModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="changePasswordModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeChangePasswordModal()">&times;</button>
+        <h3>Badilisha Nenosiri</h3>
+        <label for="currentPassword">Nenosiri la Sasa:</label>
+        <input type="password" id="currentPassword" placeholder="Weka nenosiri la sasa">
+        <label for="newPassword">Nenosiri Jipya:</label>
+        <input type="password" id="newPassword" placeholder="Weka nenosiri jipya">
+        <label for="confirmNewPassword">Thibitisha Nenosiri Jipya:</label>
+        <input type="password" id="confirmNewPassword" placeholder="Thibitisha nenosiri jipya">
+        <div class="modal-footer">
+            <button id="confirmChangePasswordBtn" class="btn-primary" onclick="confirmChangePassword()">Badilisha</button>
+            <button class="modal-close btn-secondary" onclick="closeChangePasswordModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="registerModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeRegisterModal()">&times;</button>
+        <h3>Sajili Mtumiaji Mpya</h3>
+        <label for="registerUsername">Jina la Mtumiaji:</label>
+        <input type="text" id="registerUsername" placeholder="Weka jina la mtumiaji mpya">
+        <label for="registerPassword">Nenosiri:</label>
+        <input type="password" id="registerPassword" placeholder="Weka nenosiri">
+        <label for="confirmRegisterPassword">Thibitisha Nenosiri:</label>
+        <input type="password" id="confirmRegisterPassword" placeholder="Thibitisha nenosiri">
+        <div class="modal-footer">
+            <button id="registerConfirmBtn" class="btn-success" onclick="registerUser()">Sajili</button>
+            <button class="modal-close btn-secondary" onclick="closeRegisterModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="userProfileModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeUserProfileModal()">&times;</button>
+        <h3>Profile ya Mtumiaji</h3>
+        <p>Umeingia kama: <strong id="loggedInUsername"></strong></p>
+        <div class="modal-footer">
+            <button class="btn-info" onclick="openChangePasswordModal()">Badilisha Nenosiri</button>
+            <button class="btn-danger" onclick="logout()">Toka</button>
+            <button class="modal-close btn-secondary" onclick="closeUserProfileModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div id="uploadStudentsJsonModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-corner" onclick="closeUploadStudentsJsonModal()">&times;</button>
+        <h3>Pakia Wanafunzi kwa JSON</h3>
+        <p>Bandika data ya wanafunzi katika umbizo la JSON hapa chini. Kila mwanafunzi anapaswa kuwa na 'name' na 'gender' (ME/KE).</p>
+        <textarea id="studentsJsonInput" placeholder='[{"name": "Jina La Kwanza", "gender": "ME"}, {"name": "Jina La Pili", "gender": "KE"}]'></textarea>
+        <div class="json-example">
+            **Mfano wa JSON:**
+            <pre>[
+    {"name": "Anna Peter", "gender": "KE"},
+    {"name": "Baraka Selemani", "gender": "ME"},
+    {"name": "Clara Joseph", "gender": "KE"}
+]</pre>
+        </div>
+        <div class="modal-footer">
+            <button id="uploadStudentsJsonConfirmBtn" class="btn-purple" onclick="uploadStudentsFromJson()">Pakia Wanafunzi</button>
+            <button class="modal-close btn-secondary" onclick="closeUploadStudentsJsonModal()">Funga</button>
+        </div>
+    </div>
+</div>
+
+<div class="footer-text">
+    Powered by Wella's Life
+</div>
+
+<script>
+// Function to hash passwords (simple example, NOT cryptographically secure)
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash.toString();
+}
+
+const numDaysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const monthNames = ["Januari", "Februari", "Machi", "Aprili", "Mei", "Juni",
+                    "Julai", "Agosti", "Septemba", "Oktoba", "Novemba", "Desemba"];
+
+let students = []; // Initialize empty, will load from localStorage or default
+
+let attendanceDataByYear = {}; 
+
+let currentStudentId = null;
+let currentDay = null;
+let currentMonth = null;
+let currentYear = null;
+let currentCallingIndex = 0;
+
+let selectedStudentForEdit = null;
+let selectedStudentForDelete = null;
+
+// User Management Variables
+let users = []; // This array will hold all registered users
+let currentLoggedInUsername = ''; // To store the username of the currently logged-in user
+
+
+const table = document.getElementById('attendanceTable');
+const searchInput = document.getElementById('studentSearch');
+const searchResultsDiv = document.getElementById('searchResults');
+const attendanceModal = document.getElementById('attendanceModal');
+const modalStudentName = document.getElementById('modalStudentName');
+const modalDate = document.getElementById('modalDate');
+const tableModal = document.getElementById('tableModal');
+const viewTableBtn = document.getElementById('viewTableBtn');
+const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+const callNamesBtn = document.getElementById('callNamesBtn');
+const callNamesModal = document.getElementById('callNamesModal');
+const callNameModalStudentName = document.getElementById('callNameModalStudentName');
+const callNameModalDate = document.getElementById('callNameModalDate');
+const yearSelector = document.getElementById('yearSelector');
+const monthSelector = document.getElementById('monthSelector');
+const daySelector = document.getElementById('daySelector');
+const attendanceTableTitle = document.getElementById('attendanceTableTitle');
+const attendanceFilter = document.getElementById('attendanceFilter'); // New: Absent Filter
+
+const addStudentBtn = document.getElementById('addStudentBtn');
+const editStudentBtn = document.getElementById('editStudentBtn');
+const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+const addStudentModal = document.getElementById('addStudentModal');
+const newStudentNameInput = document.getElementById('newStudentNameInput');
+const newStudentGenderSelect = document.getElementById('newStudentGenderSelect');
+
+const editStudentModal = document.getElementById('editStudentModal');
+const editStudentSearchInput = document.getElementById('editStudentSearch');
+const editSearchResultsDiv = document.getElementById('editSearchResults');
+const editedStudentNameInput = document.getElementById('editedStudentNameInput');
+const editedStudentGenderSelect = document.getElementById('editedStudentGenderSelect');
+const editStudentConfirmBtn = document.getElementById('editStudentConfirmBtn');
+
+const deleteStudentModal = document.getElementById('deleteStudentModal');
+const deleteStudentSearchInput = document.getElementById('deleteStudentSearch');
+const deleteSearchResultsDiv = document.getElementById('deleteSearchResults');
+const deleteStudentConfirmBtn = document.getElementById('deleteStudentConfirmBtn');
+
+const loginContainer = document.getElementById('loginContainer');
+const mainContent = document.getElementById('mainContent');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const loginMessage = document.getElementById('loginMessage');
+
+const profileBtn = document.getElementById('profileBtn');
+const userProfileModal = document.getElementById('userProfileModal');
+const loggedInUsernameDisplay = document.getElementById('loggedInUsername');
+
+const changePasswordModal = document.getElementById('changePasswordModal');
+const currentPasswordInput = document.getElementById('currentPassword');
+const newPasswordInput = document.getElementById('newPassword');
+const confirmNewPasswordInput = document.getElementById('confirmNewPassword');
+
+const registerModal = document.getElementById('registerModal');
+const registerUsernameInput = document.getElementById('registerUsername');
+const registerPasswordInput = document.getElementById('registerPassword');
+const confirmRegisterPasswordInput = document.getElementById('confirmRegisterPassword');
+
+const uploadStudentsJsonBtn = document.getElementById('uploadStudentsJsonBtn');
+const uploadStudentsJsonModal = document.getElementById('uploadStudentsJsonModal');
+const studentsJsonInput = document.getElementById('studentsJsonInput');
+
+const tableSearchInput = document.getElementById('tableSearchInput'); // New: Table Search Input
+
+// --- Login/Logout/User Management Functions ---
+function saveUsers() {
+    localStorage.setItem('users_v1', JSON.stringify(users));
+}
+
+function loadUsers() {
+    const storedUsers = localStorage.getItem('users_v1');
+    if (storedUsers) {
+        users = JSON.parse(storedUsers);
+    } else {
+        users = [];
+    }
+
+    // Ensure the default admin user "MWAL. Benjamin" is present
+    const mwalBenjaminUsername = "MWAL. Benjamin";
+    const mwalBenjaminPasswordHash = simpleHash("1234"); // Consider a stronger default password if this is for real use
+
+    const mwalBenjaminExists = users.some(u => u.username === mwalBenjaminUsername);
+
+    if (!mwalBenjaminExists) {
+        users.push({ username: mwalBenjaminUsername, passwordHash: mwalBenjaminPasswordHash });
+        saveUsers(); 
+    }
+}
+
+function login() {
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+    const hashedPassword = simpleHash(password);
+
+    const user = users.find(u => u.username === username && u.passwordHash === hashedPassword);
+
+    if (user) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentLoggedInUser', username);
+        currentLoggedInUsername = username;
+        showMainContent();
+        loginMessage.textContent = '';
+        usernameInput.value = '';
+        passwordInput.value = '';
+    } else {
+        loginMessage.textContent = 'Jina la mtumiaji au nenosiri si sahihi.';
+    }
+}
+
+function logout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('currentLoggedInUser');
+    currentLoggedInUsername = '';
+    hideMainContent();
+    loginMessage.textContent = '';
+    closeUserProfileModal();
+}
+
+function showMainContent() {
+    loginContainer.style.display = 'none';
+    mainContent.style.display = 'flex';
+    loggedInUsernameDisplay.textContent = localStorage.getItem('currentLoggedInUser') || '';
+}
+
+function hideMainContent() {
+    loginContainer.style.display = 'flex';
+    mainContent.style.display = 'none';
+}
+
+// --- User Profile Modal Functions ---
+function openUserProfileModal() {
+    loggedInUsernameDisplay.textContent = localStorage.getItem('currentLoggedInUser') || 'Mgeni';
+    userProfileModal.style.display = 'flex';
+}
+
+function closeUserProfileModal() {
+    userProfileModal.style.display = 'none';
+}
+
+// --- Change Password Functions ---
+function openChangePasswordModal() {
+    currentPasswordInput.value = '';
+    newPasswordInput.value = '';
+    confirmNewPasswordInput.value = '';
+    changePasswordModal.style.display = 'flex';
+    closeUserProfileModal();
+}
+
+function closeChangePasswordModal() {
+    changePasswordModal.style.display = 'none';
+}
+
+function confirmChangePassword() {
+    const userToChangePassword = users.find(u => u.username === currentLoggedInUsername);
+
+    if (!userToChangePassword) {
+        alert("Mtumiaji wa sasa hajapatikana. Tafadhali ingia tena.");
+        logout();
+        return;
+    }
+
+    const enteredCurrentPassword = currentPasswordInput.value;
+    const enteredNewPassword = newPasswordInput.value;
+    const enteredConfirmNewPassword = confirmNewPasswordInput.value;
+
+    if (simpleHash(enteredCurrentPassword) !== userToChangePassword.passwordHash) {
+        alert("Nenosiri la sasa si sahihi.");
+        return;
+    }
+
+    if (enteredNewPassword.length < 6) {
+        alert("Nenosiri jipya lazima liwe na angalau herufi 6.");
+        return;
+    }
+
+    if (enteredNewPassword !== enteredConfirmNewPassword) {
+        alert("Nenosiri jipya na uthibitisho havilingani.");
+        return;
+    }
+
+    userToChangePassword.passwordHash = simpleHash(enteredNewPassword);
+    saveUsers();
+    alert("Nenosiri limebadilishwa kwa mafanikio!");
+    closeChangePasswordModal();
+    logout();
+}
+
+// --- Register User Functions ---
+function openRegisterModal() {
+    registerUsernameInput.value = '';
+    registerPasswordInput.value = '';
+    confirmRegisterPasswordInput.value = '';
+    registerModal.style.display = 'flex';
+    loginMessage.textContent = '';
+}
+
+function closeRegisterModal() {
+    registerModal.style.display = 'none';
+}
+
+function registerUser() {
+    const newUsername = registerUsernameInput.value.trim();
+    const newPassword = registerPasswordInput.value;
+    const confirmPassword = confirmRegisterPasswordInput.value;
+
+    if (!newUsername || !newPassword || !confirmPassword) {
+        alert("Tafadhali jaza sehemu zote.");
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        alert("Nenosiri lazima liwe na angalau herufi 6.");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert("Nenosiri na uthibitisho havilingani.");
+        return;
+    }
+
+    if (users.some(user => user.username.toLowerCase() === newUsername.toLowerCase())) {
+        alert("Jina la mtumiaji tayari lipo. Tafadhali chagua jina jingine.");
+        return;
+    }
+
+    users.push({
+        username: newUsername,
+        passwordHash: simpleHash(newPassword)
+    });
+    saveUsers();
+    alert(`Mtumiaji '${newUsername}' amesajiliwa kwa mafanikio! Sasa unaweza kuingia.`);
+    closeRegisterModal();
+}
+
+function getDaysInMonth(year, month) {
+    if (month === 1) { 
+        return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
+    }
+    return numDaysInMonth[month];
+}
+
+function populateYearSelector() {
+    const currentYear = new Date().getFullYear();
+    const startYear = 2020;
+    yearSelector.innerHTML = '';
+    for (let year = currentYear + 1; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelector.appendChild(option);
+    }
+    yearSelector.value = currentYear;
+}
+
+function validateDayInput() {
+    const selectedMonth = parseInt(monthSelector.value);
+    const selectedYear = parseInt(yearSelector.value);
+    const maxDays = getDaysInMonth(selectedYear, selectedMonth);
+    let currentDayValue = parseInt(daySelector.value);
+
+    if (isNaN(currentDayValue) || currentDayValue < 1) {
+        currentDayValue = 1;
+    }
+    if (currentDayValue > maxDays) {
+        currentDayValue = maxDays;
+    }
+    daySelector.max = maxDays;
+    daySelector.value = currentDayValue;
+    
+    // Re-filter search results and update table if day changes
+    searchStudent(); 
+    buildTable(); // Update table with potential new filter
+}
+
+function calculateStudentPresentTotal(studentId, year, monthIndex) {
+    let present = 0;
+    
+    if (attendanceDataByYear[year] && attendanceDataByYear[year][studentId] && attendanceDataByYear[year][studentId][monthIndex]) {
+        const studentMonthAttendance = attendanceDataByYear[year][studentId][monthIndex];
+        studentMonthAttendance.forEach(status => {
+            if (status === 'P') present++;
+        });
+    }
+    return present;
+}
+
+function buildTable() {
+    const selectedMonth = parseInt(monthSelector.value);
+    const selectedYear = parseInt(yearSelector.value);
+    const daysInCurrentMonth = getDaysInMonth(selectedYear, selectedMonth);
+    const currentDayForFilter = parseInt(daySelector.value) - 1; // 0-indexed day for filtering
+    const filterType = attendanceFilter.value; // 'all', 'A', 'L'
+
+    let html = '<thead><tr><th>Jina la Mwanafunzi</th><th>Jinsia</th>';
+    for (let i = 1; i <= daysInCurrentMonth; i++) { html += `<th>${i}</th>`; }
+    html += '<th class="summary-column">Jumla P</th>';
+    html += '</tr></thead><tbody>';
+    
+    const filteredStudents = students.filter(student => {
+        if (filterType === 'all') return true;
+
+        // Get attendance for the specific day
+        const studentAttendanceForDay = (attendanceDataByYear[selectedYear] && 
+                                        attendanceDataByYear[selectedYear][student.id] && 
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth] &&
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter] !== undefined)
+                                        ? attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter]
+                                        : ''; // Empty string if no data
+
+        return studentAttendanceForDay === filterType;
+    });
+
+    filteredStudents.forEach((student) => {
+        html += `<tr><td>${student.name}</td><td>${student.gender}</td>`;
+        for (let j = 0; j < daysInCurrentMonth; j++) {
+            const status = (attendanceDataByYear[selectedYear] && 
+                            attendanceDataByYear[selectedYear][student.id] && 
+                            attendanceDataByYear[selectedYear][student.id][selectedMonth]) 
+                            ? attendanceDataByYear[selectedYear][student.id][selectedMonth][j] 
+                            : '';
+            html += `<td id="cell-${selectedYear}-${student.id}-${selectedMonth}-${j}">${status}</td>`;
+        }
+        const presentTotal = calculateStudentPresentTotal(student.id, selectedYear, selectedMonth);
+        html += `<td class="summary-column">${presentTotal}</td>`;
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+    filterTable(); // Apply table search filter immediately after building
+}
+
+function searchStudent() {
+    const filter = searchInput.value.toLowerCase();
+    searchResultsDiv.innerHTML = '';
+    
+    const selectedMonth = parseInt(monthSelector.value);
+    const selectedYear = parseInt(yearSelector.value);
+    const currentDayForFilter = parseInt(daySelector.value) - 1;
+    const filterType = attendanceFilter.value;
+
+    const studentsToShowInSearch = students.filter(student => {
+        // First, check if the student name matches the search filter
+        if (!student.name.toLowerCase().includes(filter)) return false;
+
+        // Then, apply the attendance filter
+        if (filterType === 'all') return true;
+
+        const studentAttendanceForDay = (attendanceDataByYear[selectedYear] && 
+                                        attendanceDataByYear[selectedYear][student.id] && 
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth] &&
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter] !== undefined)
+                                        ? attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter]
+                                        : '';
+
+        return studentAttendanceForDay === filterType;
+    });
+
+    if (!filter) return;
+
+    studentsToShowInSearch.forEach((student) => {
+        const item = document.createElement('div');
+        item.className = 'search-item';
+        item.textContent = `${student.name} (${student.gender})`;
+        item.onclick = () => openPopup(student.id);
+        searchResultsDiv.appendChild(item);
+    });
+}
+
+
+function openPopup(studentId) {
+    currentStudentId = studentId;
+    currentDay = parseInt(daySelector.value) - 1;
+    currentMonth = parseInt(monthSelector.value);
+    currentYear = parseInt(yearSelector.value);
+
+    const daysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
+    if (isNaN(currentDay) || currentDay < 0 || currentDay >= daysInCurrentMonth ||
+        isNaN(currentMonth) || currentMonth < 0 || currentMonth >= 12 ||
+        isNaN(currentYear)) {
+        alert("Tafadhali chagua tarehe sahihi (siku, mwezi, mwaka).");
+        return;
+    }
+
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+        alert("Mwanafunzi hakupatikana.");
+        return;
+    }
+
+    modalStudentName.textContent = `${student.name} (${student.gender})`;
+    modalDate.textContent = `Tarehe: ${currentDay + 1} ${monthNames[currentMonth]}, ${currentYear}`;
+    attendanceModal.style.display = 'flex';
+    
+    searchInput.value = '';
+    searchResultsDiv.innerHTML = '';
+}
+
+function closePopup() {
+    attendanceModal.style.display = 'none';
+    currentStudentId = null;
+    currentDay = null;
+    currentMonth = null;
+    currentYear = null;
+}
+
+function markAndClose(status) {
+    if (currentStudentId !== null && currentDay !== null && currentMonth !== null && currentYear !== null) {
+        if (!attendanceDataByYear[currentYear]) attendanceDataByYear[currentYear] = {};
+        if (!attendanceDataByYear[currentYear][currentStudentId]) {
+            attendanceDataByYear[currentYear][currentStudentId] = Array.from({length: 12}, () => Array(getDaysInMonth(currentYear, currentMonth)).fill(""));
+        }
+        if (!attendanceDataByYear[currentYear][currentStudentId][currentMonth]) {
+             attendanceDataByYear[currentYear][currentStudentId][currentMonth] = Array(getDaysInMonth(currentYear, currentMonth)).fill("");
+        }
+
+        attendanceDataByYear[currentYear][currentStudentId][currentMonth][currentDay] = status;
+        saveData();
+        buildTable(); // Rebuild table to reflect changes and new filters
+        closePopup();
+    }
+}
+
+function openCallNamesModal() {
+    currentDay = parseInt(daySelector.value) - 1;
+    currentMonth = parseInt(monthSelector.value);
+    currentYear = parseInt(yearSelector.value);
+
+    const daysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
+    if (isNaN(currentDay) || currentDay < 0 || currentDay >= daysInCurrentMonth ||
+        isNaN(currentMonth) || currentMonth < 0 || currentMonth >= 12 ||
+        isNaN(currentYear)) {
+        alert("Tafadhali chagua tarehe sahihi (siku, mwezi, mwaka).");
+        return;
+    }
+    if (students.length === 0) {
+        alert("Hakuna wanafunzi wa kuita majina. Tafadhali ongeza wanafunzi kwanza.");
+        return;
+    }
+    
+    // Filter students based on the selected attendance filter
+    const filterType = attendanceFilter.value;
+    const studentsToCall = students.filter(student => {
+        if (filterType === 'all') return true;
+
+        const studentAttendanceForDay = (attendanceDataByYear[currentYear] && 
+                                        attendanceDataByYear[currentYear][student.id] && 
+                                        attendanceDataByYear[currentYear][student.id][currentMonth] &&
+                                        attendanceDataByYear[currentYear][student.id][currentMonth][currentDay] !== undefined)
+                                        ? attendanceDataByYear[currentYear][student.id][currentMonth][currentDay]
+                                        : '';
+        return studentAttendanceForDay === filterType;
+    });
+
+    if (studentsToCall.length === 0 && filterType !== 'all') {
+        alert(`Hakuna wanafunzi walio '${filterType}' kwa tarehe hii. Jaribu kubadilisha kichujio.`);
+        return;
+    }
+
+    students = studentsToCall; // Temporarily update students array for calling sequence
+    currentCallingIndex = 0;
+    displayNextStudentForCall();
+    callNamesModal.style.display = 'flex';
+}
+
+function displayNextStudentForCall() {
+    if (currentCallingIndex < students.length) {
+        const student = students[currentCallingIndex];
+        callNameModalStudentName.textContent = `${student.name} (${student.gender})`;
+        callNameModalDate.textContent = `Tarehe: ${currentDay + 1} ${monthNames[currentMonth]}, ${currentYear}`;
+    } else {
+        alert("Umemaliza kuweka mahudhurio kwa wanafunzi wote kwa siku hii!");
+        closeCallNamesModal();
+        loadData(); // Reload all students after calling to reset the filtered list
+        buildTable();
+    }
+}
+
+function markAndAdvance(status) {
+    if (currentCallingIndex < students.length && currentDay !== null && currentMonth !== null && currentYear !== null) {
+        const student = students[currentCallingIndex];
+        if (!attendanceDataByYear[currentYear]) attendanceDataByYear[currentYear] = {};
+        if (!attendanceDataByYear[currentYear][student.id]) {
+            attendanceDataByYear[currentYear][student.id] = Array.from({length: 12}, () => Array(getDaysInMonth(currentYear, currentMonth)).fill(""));
+        }
+        if (!attendanceDataByYear[currentYear][student.id][currentMonth]) {
+             attendanceDataByYear[currentYear][student.id][currentMonth] = Array(getDaysInMonth(currentYear, currentMonth)).fill("");
+        }
+        
+        attendanceDataByYear[currentYear][student.id][currentMonth][currentDay] = status;
+        saveData();
+        buildTable(); // Update table in background
+        currentCallingIndex++;
+        displayNextStudentForCall();
+    }
+}
+
+function closeCallNamesModal() {
+    callNamesModal.style.display = 'none';
+    currentCallingIndex = 0;
+    loadData(); // Ensure original student list is restored
+}
+
+function showTableModal() {
+    const selectedMonth = parseInt(monthSelector.value);
+    const selectedYear = parseInt(yearSelector.value);
+    attendanceTableTitle.textContent = `Mahudhurio ya Mwezi wa ${monthNames[selectedMonth]}, Mwaka ${selectedYear}`;
+    buildTable();
+    tableSearchInput.value = ''; // Clear search input when opening modal
+    tableModal.style.display = 'flex';
+    filterTable(); // Apply any existing filter from buildTable (though it should be empty)
+}
+
+function hideTableModal() {
+    tableModal.style.display = 'none';
+}
+
+function filterTable() {
+    const filter = tableSearchInput.value.toLowerCase();
+    const rows = table.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const studentNameCell = row.cells[0]; // Assuming name is the first cell
+        if (studentNameCell) {
+            const name = studentNameCell.textContent.toLowerCase();
+            if (name.includes(filter)) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        }
+    });
+}
+
+function downloadAsPdf() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'landscape'
+    });
+
+    const selectedMonth = parseInt(monthSelector.value);
+    const selectedYear = parseInt(yearSelector.value);
+    const monthNameForPdf = monthNames[selectedMonth];
+    const daysInCurrentMonth = getDaysInMonth(selectedYear, selectedMonth);
+    const currentDayForFilter = parseInt(daySelector.value) - 1;
+    const filterType = attendanceFilter.value;
+
+    doc.setFontSize(18);
+    doc.text("Ripoti ya Mahudhurio ya Wanafunzi", 14, 22);
+    doc.setFontSize(12);
+    doc.text("Shule ya Msingi Mabatini", 14, 30);
+    doc.text(`Mwezi: ${monthNameForPdf}, Mwaka: ${selectedYear}`, 14, 38);
+    if (filterType !== 'all') {
+        doc.text(`Wanafunzi Waliochujwa: ${filterType === 'A' ? 'Waliokosa' : 'Waliochelewa'} (Tarehe: ${currentDayForFilter + 1})`, 14, 46);
+    }
+
+    const head = [['Jina la Mwanafunzi', 'Jinsia']];
+    for (let i = 1; i <= daysInCurrentMonth; i++) {
+        head[0].push(String(i));
+    }
+    head[0].push('Jumla P');
+
+    const filteredStudents = students.filter(student => {
+        if (filterType === 'all') return true;
+
+        const studentAttendanceForDay = (attendanceDataByYear[selectedYear] && 
+                                        attendanceDataByYear[selectedYear][student.id] && 
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth] &&
+                                        attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter] !== undefined)
+                                        ? attendanceDataByYear[selectedYear][student.id][selectedMonth][currentDayForFilter]
+                                        : '';
+        return studentAttendanceForDay === filterType;
+    });
+
+    const body = filteredStudents.map((student) => {
+        const studentMonthAttendance = (attendanceDataByYear[selectedYear] && 
+                                       attendanceDataByYear[selectedYear][student.id] && 
+                                       attendanceDataByYear[selectedYear][student.id][selectedMonth])
+                                       ? attendanceDataByYear[selectedYear][student.id][selectedMonth].slice(0, daysInCurrentMonth)
+                                       : Array(daysInCurrentMonth).fill('');
+        const presentTotal = calculateStudentPresentTotal(student.id, selectedYear, selectedMonth);
+        return [student.name, student.gender, ...studentMonthAttendance, presentTotal];
+    });
+
+    doc.autoTable({
+        head: head,
+        body: body,
+        startY: filterType === 'all' ? 45 : 55, // Adjust startY if filter text is added
+        theme: 'grid',
+        styles: {
+            fontSize: 7,
+            cellPadding: 1.5,
+            overflow: 'linebreak'
+        },
+        headStyles: {
+            fillColor: [22, 160, 133],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        columnStyles: {
+            0: { cellWidth: 35, fontStyle: 'bold' },
+            1: { cellWidth: 15 },
+            [daysInCurrentMonth + 2]: { fillColor: [209, 236, 241], textColor: [12, 84, 96], fontStyle: 'bold' }
+        }
+    });
+
+    doc.save(`Mahudhurio - ${monthNameForPdf}-${selectedYear}${filterType !== 'all' ? `_${filterType}_Day${currentDayForFilter + 1}` : ''}.pdf`);
+}
+
+function generateUniqueId() {
+    const timestamp = Date.now().toString(36);
+    const randomString = Math.random().toString(36).substring(2, 5);
+    return 'S' + timestamp + randomString;
+}
+
+function openAddStudentModal() {
+    newStudentNameInput.value = '';
+    newStudentGenderSelect.value = 'ME';
+    addStudentModal.style.display = 'flex';
+}
+
+function closeAddStudentModal() {
+    addStudentModal.style.display = 'none';
+}
+
+function confirmAddStudent() {
+    const newName = newStudentNameInput.value.trim();
+    const newGender = newStudentGenderSelect.value;
+    if (!newName) {
+        alert("Tafadhali ingiza jina la mwanafunzi.");
+        return;
+    }
+    if (students.some(s => s.name.toLowerCase() === newName.toLowerCase())) {
+        alert(`Mwanafunzi '${newName}' tayari yupo.`);
+        return;
+    }
+    
+    const newId = generateUniqueId();
+    students.push({ id: newId, name: newName, gender: newGender });
+    
+    sortStudents();
+    saveData();
+    buildTable();
+    closeAddStudentModal();
+    alert(`Mwanafunzi '${newName}' (${newGender}) ameongezwa kwa mafanikio.`);
+    checkAndEnableActionButtons();
+}
+
+// --- JSON Upload Functions ---
+function openUploadStudentsJsonModal() {
+    studentsJsonInput.value = '';
+    uploadStudentsJsonModal.style.display = 'flex';
+}
+
+function closeUploadStudentsJsonModal() {
+    uploadStudentsJsonModal.style.display = 'none';
+}
+
+function uploadStudentsFromJson() {
+    const jsonString = studentsJsonInput.value.trim();
+    if (!jsonString) {
+        alert("Tafadhali bandika data ya JSON.");
+        return;
+    }
+
+    let newStudentsData;
+    try {
+        newStudentsData = JSON.parse(jsonString);
+    } catch (e) {
+        alert("JSON Batili. Tafadhali hakikisha umbizo ni sahihi.\n\n" + e.message);
+        return;
+    }
+
+    if (!Array.isArray(newStudentsData)) {
+        alert("Data ya JSON inapaswa kuwa 'Array' ya wanafunzi.");
+        return;
+    }
+
+    let studentsAddedCount = 0;
+    let studentsSkippedCount = 0;
+    const errors = [];
+
+    newStudentsData.forEach(student => {
+        if (typeof student !== 'object' || student === null || !student.name || !student.gender) {
+            errors.push(`Mwanafunzi asiye sahihi: ${JSON.stringify(student)}. Kila mwanafunzi anahitaji 'name' na 'gender'.`);
+            return;
+        }
+        if (!['ME', 'KE'].includes(student.gender.toUpperCase())) {
+            errors.push(`Jinsia isiyo sahihi kwa ${student.name}: '${student.gender}'. Tumia 'ME' au 'KE'.`);
+            return;
+        }
+
+        const studentName = student.name.trim();
+        const studentGender = student.gender.toUpperCase();
+
+        if (students.some(s => s.name.toLowerCase() === studentName.toLowerCase())) {
+            studentsSkippedCount++;
+            return;
+        }
+
+        const newId = generateUniqueId();
+        students.push({ id: newId, name: studentName, gender: studentGender });
+        studentsAddedCount++;
+    });
+
+    sortStudents();
+    saveData();
+    buildTable();
+    closeUploadStudentsJsonModal();
+
+    let successMessage = `Imepakia wanafunzi ${studentsAddedCount} wapya.`;
+    if (studentsSkippedCount > 0) {
+        successMessage += ` Wanafunzi ${studentsSkippedCount} walirukwa (tayari wapo).`;
+    }
+    if (errors.length > 0) {
+        successMessage += ` Kuna makosa ${errors.length} katika data:\n- ` + errors.join('\n- ');
+        alert(successMessage);
+    } else {
+        alert(successMessage);
+    }
+    
+    checkAndEnableActionButtons();
+}
+
+function openEditStudentModal() {
+    if (students.length === 0) {
+        alert("Hakuna wanafunzi wa kuhariri. Tafadhali ongeza wanafunzi kwanza.");
+        return;
+    }
+    editStudentSearchInput.value = '';
+    editSearchResultsDiv.innerHTML = '';
+    editedStudentNameInput.value = '';
+    editedStudentGenderSelect.value = 'ME';
+    selectedStudentForEdit = null;
+    editStudentConfirmBtn.disabled = true;
+    editStudentModal.style.display = 'flex';
+}
+
+function closeEditStudentModal() {
+    editStudentModal.style.display = 'none';
+}
+
+function searchEditStudent() {
+    const filter = editStudentSearchInput.value.toLowerCase();
+    editSearchResultsDiv.innerHTML = '';
+    editStudentConfirmBtn.disabled = true;
+    selectedStudentForEdit = null;
+
+    if (!filter) return;
+
+    students.forEach((student) => {
+        if (student.name.toLowerCase().includes(filter)) {
+            const item = document.createElement('div');
+            item.className = 'search-item';
+            item.textContent = `${student.name} (${student.gender})`;
+            item.onclick = () => selectStudentForEdit(student);
+            editSearchResultsDiv.appendChild(item);
+        }
+    });
+}
+
+function selectStudentForEdit(student) {
+    selectedStudentForEdit = student;
+    editStudentSearchInput.value = `${student.name} (${student.gender})`;
+    editSearchResultsDiv.innerHTML = '';
+    editedStudentNameInput.value = student.name;
+    editedStudentGenderSelect.value = student.gender;
+    editStudentConfirmBtn.disabled = false;
+}
+
+function confirmEditStudent() {
+    if (!selectedStudentForEdit) {
+        alert("Tafadhali chagua mwanafunzi wa kuhariri kwanza.");
+        return;
+    }
+
+    const originalName = selectedStudentForEdit.name;
+    const editedName = editedStudentNameInput.value.trim();
+    const editedGender = editedStudentGenderSelect.value;
+
+    if (!editedName) {
+        alert("Jina la mwanafunzi haliwezi kuwa tupu.");
+        return;
+    }
+
+    if (editedName.toLowerCase() !== originalName.toLowerCase() && 
+        students.some(s => s.id !== selectedStudentForEdit.id && s.name.toLowerCase() === editedName.toLowerCase())) {
+        alert(`Jina '${editedName}' tayari linatumiwa na mwanafunzi mwingine.`);
+        return;
+    }
+
+    const studentIndex = students.findIndex(s => s.id === selectedStudentForEdit.id);
+    if (studentIndex > -1) {
+        students[studentIndex].name = editedName;
+        students[studentIndex].gender = editedGender;
+    }
+    
+    sortStudents();
+    saveData();
+    buildTable();
+    closeEditStudentModal();
+    alert(`Taarifa za mwanafunzi '${originalName}' zimehaririwa kuwa '${editedName}' (${editedGender}) kwa mafanikio.`);
+}
+
+
+function openDeleteStudentModal() {
+    if (students.length === 0) {
+        alert("Hakuna wanafunzi wa kufuta.");
+        return;
+    }
+    deleteStudentSearchInput.value = '';
+    deleteSearchResultsDiv.innerHTML = '';
+    selectedStudentForDelete = null;
+    deleteStudentConfirmBtn.disabled = true;
+    deleteStudentModal.style.display = 'flex';
+}
+
+function closeDeleteStudentModal() {
+    deleteStudentModal.style.display = 'none';
+}
+
+function searchDeleteStudent() {
+    const filter = deleteStudentSearchInput.value.toLowerCase();
+    deleteSearchResultsDiv.innerHTML = '';
+    deleteStudentConfirmBtn.disabled = true;
+    selectedStudentForDelete = null;
+
+    if (!filter) return;
+
+    students.forEach((student) => {
+        if (student.name.toLowerCase().includes(filter)) {
+            const item = document.createElement('div');
+            item.className = 'search-item';
+            item.textContent = `${student.name} (${student.gender})`;
+            item.onclick = () => selectStudentForDelete(student);
+            deleteSearchResultsDiv.appendChild(item);
+        }
+    });
+}
+
+function selectStudentForDelete(student) {
+    selectedStudentForDelete = student;
+    deleteStudentSearchInput.value = `${student.name} (${student.gender})`;
+    deleteSearchResultsDiv.innerHTML = '';
+    deleteStudentConfirmBtn.disabled = false;
+}
+
+function confirmDeleteStudent() {
+    if (!selectedStudentForDelete) {
+        alert("Tafadhali chagua mwanafunzi wa kufuta kwanza.");
+        return;
+    }
+
+    const studentToDeleteName = selectedStudentForDelete.name;
+    const studentToDeleteGender = selectedStudentForDelete.gender;
+    const studentToDeleteId = selectedStudentForDelete.id;
+
+    if (confirm(`Una uhakika unataka kumfuta mwanafunzi '${studentToDeleteName}' (${studentToDeleteGender})? Data zake zote za mahudhurio zitafutwa kwa miaka yote!`)) {
+        students = students.filter(s => s.id !== studentToDeleteId);
+        
+        for (const year in attendanceDataByYear) {
+            if (attendanceDataByYear.hasOwnProperty(year)) {
+                if (attendanceDataByYear[year][studentToDeleteId]) {
+                    delete attendanceDataByYear[year][studentToDeleteId];
+                }
+            }
+        }
+        
+        saveData();
+        sortStudents();
+        buildTable();
+        closeDeleteStudentModal();
+        alert(`Mwanafunzi '${studentToDeleteName}' amefutwa kwa mafanikio.`);
+        checkAndEnableActionButtons();
+    }
+}
+
+function sortStudents() {
+    students.sort((a, b) => {
+        // Sort by gender first: Male (ME) then Female (KE)
+        if (a.gender === 'ME' && b.gender === 'KE') return -1;
+        if (a.gender === 'KE' && b.gender === 'ME') return 1;
+        
+        // Then sort alphabetically by name
+        return a.name.localeCompare(b.name);
+    });
+}
+
+function saveData() {
+  localStorage.setItem('students_v8', JSON.stringify(students));
+  localStorage.setItem('attendanceDataByYear_v8', JSON.stringify(attendanceDataByYear));
+}
+
+function loadData() {
+  const storedStudents = localStorage.getItem('students_v8');
+  const storedAttendance = localStorage.getItem('attendanceDataByYear_v8');
+  
+  if (storedStudents) {
+    students = JSON.parse(storedStudents);
+  } else {
+    // Default students if none are stored
+    students = [
+        { id: generateUniqueId(), name: "Ali Musa", gender: "ME" },
+        { id: generateUniqueId(), name: "Juma Bakari", gender: "ME" },
+        { id: generateUniqueId(), name: "Hassan Ali", gender: "ME" },
+        { id: generateUniqueId(), name: "Said Jafari", gender: "ME" },
+        { id: generateUniqueId(), name: "Bakari Issa", gender: "ME" },
+        { id: generateUniqueId(), name: "Asha Omary", gender: "KE" },
+        { id: generateUniqueId(), name: "Fatma Said", gender: "KE" },
+        { id: generateUniqueId(), name: "Mwanaidi Ramadhani", gender: "KE" },
+        { id: generateUniqueId(), name: "Salma Suleiman", gender: "KE" },
+        { id: generateUniqueId(), name: "Zainab Hamisi", gender: "KE" }
+    ];
+  }
+
+  if (storedAttendance) {
+    attendanceDataByYear = JSON.parse(storedAttendance);
+  } else {
+    attendanceDataByYear = {};
+  }
+  
+  // Ensure all students have a unique ID, for older data compatibility
+  students.forEach(student => {
+    if (!student.id) {
+        student.id = generateUniqueId();
+    }
+  });
+
+  sortStudents();
+  ensureAttendanceDataIntegrity();
+  saveData(); // Save back any changes from integrity check or ID generation
+}
+
+function ensureAttendanceDataIntegrity() {
+    const currentYear = parseInt(yearSelector.value);
+    
+    // Remove attendance data for deleted students
+    const currentStudentIDs = new Set(students.map(s => s.id));
+    for (const year in attendanceDataByYear) {
+        if (attendanceDataByYear.hasOwnProperty(year)) {
+            const yearData = attendanceDataByYear[year];
+            for (const studentId in yearData) {
+                if (yearData.hasOwnProperty(studentId) && !currentStudentIDs.has(studentId)) {
+                    delete yearData[studentId];
+                }
+            }
+        }
+    }
+
+    // Ensure all remaining students have attendance arrays for all years/months
+    for (const year of Object.keys(attendanceDataByYear).map(Number)) {
+        if (!attendanceDataByYear[year]) {
+            attendanceDataByYear[year] = {}; // Should ideally not happen if loop based on keys
+        }
+        students.forEach(student => {
+            // Initialize student's attendance for the year if it doesn't exist
+            if (!attendanceDataByYear[year][student.id]) {
+                attendanceDataByYear[year][student.id] = Array.from({length: 12}, () => 
+                    Array(getDaysInMonth(year, 0)).fill("") // Use day count for Jan (0) as placeholder
+                );
+            }
+
+            let studentYearAttendance = attendanceDataByYear[year][student.id];
+            
+            // Ensure studentYearAttendance has 12 months
+            if (studentYearAttendance.length !== 12) {
+                const existingMonths = studentYearAttendance;
+                studentYearAttendance = Array.from({length: 12}, (_, monthIndex) => {
+                    const monthData = existingMonths[monthIndex] || [];
+                    const daysInMonth = getDaysInMonth(year, monthIndex);
+                    return monthData.length === daysInMonth ? monthData : Array(daysInMonth).fill("");
+                });
+                attendanceDataByYear[year][student.id] = studentYearAttendance;
+            } else {
+                // Ensure each month array has the correct number of days
+                studentYearAttendance.forEach((monthData, monthIndex) => {
+                    const daysInMonth = getDaysInMonth(year, monthIndex);
+                    if (monthData.length !== daysInMonth) {
+                        // If length is wrong, re-initialize with correct number of days
+                        studentYearAttendance[monthIndex] = Array(daysInMonth).fill("");
+                    }
+                });
+            }
+        });
+    }
+    
+    // Ensure attendance data exists for the currently selected year even if no data was stored for it
+    if (!attendanceDataByYear[currentYear]) {
+        attendanceDataByYear[currentYear] = {};
+        students.forEach(student => {
+            attendanceDataByYear[currentYear][student.id] = Array.from({length: 12}, () => 
+                Array(getDaysInMonth(currentYear, 0)).fill("")
+            );
+        });
+    }
+}
+
+function checkAndEnableActionButtons() {
+    const hasStudents = students.length > 0;
+    callNamesBtn.disabled = !hasStudents;
+    editStudentBtn.disabled = !hasStudents;
+    deleteStudentBtn.disabled = !hasStudents;
+    // Also disable search input and filter if no students
+    searchInput.disabled = !hasStudents;
+    attendanceFilter.disabled = !hasStudents;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadUsers();
+
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+        currentLoggedInUsername = localStorage.getItem('currentLoggedInUser');
+        showMainContent();
+    } else {
+        hideMainContent();
+    }
+    
+    const today = new Date();
+    const currentSystemYear = today.getFullYear();
+    const currentSystemMonth = today.getMonth(); // 0-11
+    const currentSystemDay = today.getDate(); // 1-31
+
+    populateYearSelector();
+    
+    yearSelector.value = currentSystemYear;
+    monthSelector.value = currentSystemMonth;
+    daySelector.value = currentSystemDay;
+
+    loadData();
+    validateDayInput(); // Validate day based on selected month/year
+    buildTable();
+    checkAndEnableActionButtons();
+
+    addStudentBtn.addEventListener('click', openAddStudentModal);
+    editStudentBtn.addEventListener('click', openEditStudentModal);
+    deleteStudentBtn.addEventListener('click', openDeleteStudentModal);
+    profileBtn.addEventListener('click', openUserProfileModal);
+    uploadStudentsJsonBtn.addEventListener('click', openUploadStudentsJsonModal);
+    
+    document.querySelector('#loginForm .btn-success').addEventListener('click', openRegisterModal);
+
+
+    yearSelector.addEventListener('change', () => {
+        validateDayInput();
+        ensureAttendanceDataIntegrity();
+        buildTable();
+        searchStudent(); // Re-filter search results based on new year
+    });
+    monthSelector.addEventListener('change', () => {
+        validateDayInput();
+        buildTable();
+        searchStudent(); // Re-filter search results based on new month
+    });
+    daySelector.addEventListener('input', () => { // Use 'input' for live updates
+        validateDayInput();
+        buildTable();
+        searchStudent(); // Re-filter search results based on new day
+    });
+    attendanceFilter.addEventListener('change', () => { // New: Absent Filter Event
+        searchStudent(); // Re-filter search results based on new filter
+        buildTable(); // Rebuild table to apply filter
+    });
+
+    viewTableBtn.addEventListener('click', showTableModal);
+    downloadPdfBtn.addEventListener('click', downloadAsPdf);
+    callNamesBtn.addEventListener('click', openCallNamesModal);
+
+    tableSearchInput.addEventListener('input', filterTable); // New: Table Search Event
+
+    document.addEventListener('click', function(event) {
+        // Close search results if clicked outside
+        if (searchResultsDiv && !document.getElementById('studentSearchContainer').contains(event.target)) {
+            searchResultsDiv.innerHTML = '';
+        }
+        if (editSearchResultsDiv && !document.querySelector('#editStudentModal .search-container').contains(event.target)) {
+            editSearchResultsDiv.innerHTML = '';
+        }
+        if (deleteSearchResultsDiv && !document.querySelector('#deleteStudentModal .search-container').contains(event.target)) {
+            deleteSearchResultsDiv.innerHTML = '';
+        }
+    });
+
+    // Handle Enter key for login
+    usernameInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            passwordInput.focus();
+        }
+    });
+    passwordInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            login();
+        }
+    });
+});
+</script>
+</body>
+</html>
