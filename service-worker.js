@@ -1,9 +1,10 @@
-const CACHE_NAME = 'tendency-cache-v1';
+const CACHE_NAME = 'tendency-cache-v2';
 const urlsToCache = [
-  '/tendency/',
+  './',
   'index.html',
   'app.js',
-  'manifest.json'
+  'manifest.json',
+  'icon.png'
 ];
 
 self.addEventListener('install', event => {
