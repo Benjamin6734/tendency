@@ -1,7 +1,7 @@
 {
   "name": "Mfumo wa Mahudhurio Shule ya Msingi Mabatini",
-  "short_name": "Mahudhurio Mabatini",
-  "description": "App ya kuratibu na kuangalia mahudhurio ya wanafunzi shule ya msingi Mabatini",
+  "short_name": "Mahudhurio",
+  "description": "App ya kuangalia mahudhurio ya wanafunzi shule ya msingi Mabatini",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -13,7 +13,13 @@
       "src": "rsz_capture.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "rsz_capture.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
